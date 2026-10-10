@@ -8,10 +8,11 @@ on:
 
 jobs:
   build-and-test:
+    name: Build & Run Full Test Suite
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Setup Node.js 22
@@ -19,12 +20,21 @@ jobs:
         with:
           node-version: 22
 
-      - name: Create .env from .env.example
-        run: cp .env.example .env
-
-      - name: Start All 10 Microservices Containers
+      - name: Start All 10 Containers
         run: |
-          docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build --wait
+          docker compose up -d --build
+          echo "Waiting for all containers to initialize..."
+          sleep 15
+          for i in {1..30}; do
+            STARTING=$(docker ps --filter "health_status=starting" -q)
+            if [ -z "$STARTING" ]; then
+              echo "All containers reached healthy state!"
+              break
+            fi
+            echo "Waiting for services to finish healthchecks ($i/30)..."
+            sleep 3
+          done
+          docker ps
 
       - name: Run CI Test Suite (Unit + E2E 25 TCs)
         run: node scripts/ci.js
