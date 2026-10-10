@@ -1,0 +1,28 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_CUSTOMER")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model MemberShip {
+  mid       Int        @id
+  mname     String     @unique
+  score     Int
+  customers Customer[]
+
+  @@map("MemberShip")
+}
+
+model Customer {
+  uid        Int        @id
+  fullname   String
+  mid        Int        @default(1)
+  membership MemberShip @relation(fields: [mid], references: [mid])
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  @@map("Customer")
+}

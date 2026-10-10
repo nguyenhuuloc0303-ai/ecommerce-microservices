@@ -23,6 +23,11 @@ services:
     ports:
       - "3001:3001"
 
+  customer-service:
+    ports:
+      - "3002:3002"
+      - "50052:50052"
+
   api-gateway:
     ports:
       - "8080:8080"

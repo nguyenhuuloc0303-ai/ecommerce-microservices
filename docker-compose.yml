@@ -9,7 +9,7 @@ volumes:
   kafka_data:
 
 services:
-  # 1. PostgreSQL (Logical DBs: auth_db, customer_db, order_db)
+  # 1. PostgreSQL
   postgres:
     build:
       context: ./docker/postgres
@@ -33,7 +33,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # 2. MongoDB (Logical DBs: product_db, shipment_db)
+  # 2. MongoDB
   mongo:
     build:
       context: ./docker/mongo
@@ -58,7 +58,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # 3. Redis (Cache & Rate Limiter)
+  # 3. Redis
   redis:
     image: redis:7-alpine
     container_name: redis
@@ -74,7 +74,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # 4. Apache Kafka (KRaft Single Node)
+  # 4. Apache Kafka
   kafka:
     image: apache/kafka:3.9.0
     container_name: kafka
@@ -156,7 +156,33 @@ services:
       timeout: 3s
       retries: 5
 
-  # 7. API Gateway (Only service publishing port 8080 to host)
+  # 7. Customer Service (Customer & Membership + gRPC 50052)
+  customer-service:
+    build:
+      context: .
+      dockerfile: services/customer-service/Dockerfile
+    container_name: customer-service
+    restart: unless-stopped
+    environment:
+      PORT: 3002
+      GRPC_PORT: 50052
+      DATABASE_URL_CUSTOMER: postgresql://customer_user:customer_pass@postgres:5432/customer_db
+      KAFKA_BROKER: kafka:9092
+      NODE_ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - ecom-net
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3002/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # 8. API Gateway
   api-gateway:
     build:
       context: .
