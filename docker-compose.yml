@@ -125,3 +125,33 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
+
+  # 6. Auth Service (Identity & Access)
+  auth-service:
+    build:
+      context: .
+      dockerfile: services/auth/Dockerfile
+    container_name: auth-service
+    restart: unless-stopped
+    environment:
+      PORT: 3001
+      DATABASE_URL_AUTH: postgresql://auth_user:auth_pass@postgres:5432/auth_db
+      JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-for-microservices-2026}
+      KAFKA_BROKER: kafka:9092
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin@123}
+      SHIPMENT_STAFF_USERNAME: ${SHIPMENT_STAFF_USERNAME:-shipment_staff}
+      SHIPMENT_STAFF_PASSWORD: ${SHIPMENT_STAFF_PASSWORD:-Staff@123}
+      NODE_ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - ecom-net
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 5s
+      timeout: 3s
+      retries: 5

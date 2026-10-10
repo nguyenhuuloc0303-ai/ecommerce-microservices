@@ -1,0 +1,42 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_AUTH")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Role {
+  roleid   Int    @id @default(autoincrement())
+  rolename String @unique
+  users    User[]
+
+  @@map("Role")
+}
+
+model User {
+  uid       Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  email     String?  @unique
+  phone     String?
+  roleid    Int      @default(1)
+  role      Role     @relation(fields: [roleid], references: [roleid])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("User")
+}
+
+model OutboxEvent {
+  id        String    @id @default(uuid())
+  eventType String
+  topic     String
+  payload   Json
+  status    String    @default("PENDING")
+  createdAt DateTime  @default(now())
+  sentAt    DateTime?
+
+  @@map("OutboxEvent")
+}
