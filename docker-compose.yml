@@ -9,7 +9,7 @@ volumes:
   kafka_data:
 
 services:
-  # 1. PostgreSQL
+  # 1. PostgreSQL (Logical DBs: auth_db, customer_db, order_db)
   postgres:
     build:
       context: ./docker/postgres
@@ -33,7 +33,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # 2. MongoDB
+  # 2. MongoDB (Logical DBs: product_db, shipment_db)
   mongo:
     build:
       context: ./docker/mongo
@@ -213,7 +213,32 @@ services:
       timeout: 3s
       retries: 5
 
-  # 9. API Gateway
+  # 9. Shipment Service (Shipment & Tracking + Kafka Consumer)
+  shipment-service:
+    build:
+      context: .
+      dockerfile: services/shipment-service/Dockerfile
+    container_name: shipment-service
+    restart: unless-stopped
+    environment:
+      PORT: 3005
+      MONGO_URI: mongodb://shipment_user:shipment_pass@mongo:27017/shipment_db?authSource=shipment_db
+      KAFKA_BROKER: kafka:9092
+      NODE_ENV: development
+    depends_on:
+      mongo:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - ecom-net
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3005/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # 10. API Gateway
   api-gateway:
     build:
       context: .

@@ -33,6 +33,10 @@ services:
     ports:
       - "3004:3004"
 
+  shipment-service:
+    ports:
+      - "3005:3005"
+
   api-gateway:
     ports:
       - "8080:8080"
