@@ -12,7 +12,7 @@ Runbook này hướng dẫn từng thao tác cụ thể, lệnh CLI và kiểm t
   git status
   git log -p | grep "DATABASE_URL"
   ```
-- **Giải thích:** File `.gitignore` đã cấu hình chặn nghiêm ngặt `.env`. Dự án chỉ chia sẻ `.env.example` chứa các biến mẫu không chứa secret thực tế.
+- **Giải thích:** File `.gitignore` đã cấu hình chặn nghiêm ngặt `.env`. Dự án chỉ chia sẻ `.env` chứa các biến mẫu không chứa secret thực tế.
 
 ---
 
@@ -20,7 +20,7 @@ Runbook này hướng dẫn từng thao tác cụ thể, lệnh CLI và kiểm t
 - **Mục tiêu:** Khởi động hệ thống sạch và chứng minh 10/10 container hoạt động khỏe mạnh.
 - **Thao tác:**
   ```bash
-  docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+  docker compose up -d --build
   docker ps
   curl http://localhost:8080/api/health
   docker stats --no-stream

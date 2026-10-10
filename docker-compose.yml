@@ -11,6 +11,8 @@ volumes:
 services:
   # 1. PostgreSQL (Logical DBs: auth_db, customer_db, order_db)
   postgres:
+    ports:
+      - "5432:5432"
     build:
       context: ./docker/postgres
       dockerfile: Dockerfile
@@ -35,6 +37,8 @@ services:
 
   # 2. MongoDB (Logical DBs: product_db, shipment_db)
   mongo:
+    ports:
+      - "27017:27017"
     build:
       context: ./docker/mongo
       dockerfile: Dockerfile
@@ -60,6 +64,8 @@ services:
 
   # 3. Redis
   redis:
+    ports:
+      - "6379:6379"
     image: redis:7-alpine
     container_name: redis
     restart: unless-stopped
@@ -76,6 +82,8 @@ services:
 
   # 4. Apache Kafka
   kafka:
+    ports:
+      - "9092:9092"
     image: apache/kafka:3.9.0
     container_name: kafka
     restart: unless-stopped
@@ -105,6 +113,9 @@ services:
 
   # 5. Product Service
   product-service:
+    ports:
+      - "3003:3003"
+      - "50053:50053"
     build:
       context: .
       dockerfile: services/product-service/Dockerfile
@@ -128,6 +139,8 @@ services:
 
   # 6. Auth Service
   auth-service:
+    ports:
+      - "3001:3001"
     build:
       context: .
       dockerfile: services/auth/Dockerfile
@@ -158,6 +171,9 @@ services:
 
   # 7. Customer Service (Customer & Membership + gRPC 50052)
   customer-service:
+    ports:
+      - "3002:3002"
+      - "50052:50052"
     build:
       context: .
       dockerfile: services/customer-service/Dockerfile
@@ -184,6 +200,8 @@ services:
 
   # 8. Order Service (Order & OrderDetail + Transactional Outbox)
   order-service:
+    ports:
+      - "3004:3004"
     build:
       context: .
       dockerfile: services/order-service/Dockerfile
@@ -215,6 +233,8 @@ services:
 
   # 9. Shipment Service (Shipment & Tracking + Kafka Consumer)
   shipment-service:
+    ports:
+      - "3005:3005"
     build:
       context: .
       dockerfile: services/shipment-service/Dockerfile

@@ -12,11 +12,9 @@ Hệ sinh thái chuẩn 10 container tối ưu, đáp ứng trọn vẹn 8 tiêu
 # Bước 1: Clone repo hoặc cd vào thư mục dự án
 cd ecommerce-microservices
 
-# Bước 2: Tạo file biến môi trường từ template mẫu
-cp .env.example .env
 
 # Bước 3: Khởi động toàn bộ 10 container
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+docker compose up -d --build
 ```
 
 Kiểm tra trạng thái hệ thống:
