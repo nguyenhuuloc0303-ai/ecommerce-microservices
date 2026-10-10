@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const config = require("./infrastructure/config");
 const logger = require("./infrastructure/logger");
 const { connectMongo } = require("./infrastructure/database/mongoose.connection");
+const { startGrpcServer } = require("./interfaces/grpc/product.grpc.server");
 const productRoutes = require("./interfaces/http/product.routes");
 const { errorHandler } = require("./interfaces/http/middlewares/error.middleware");
 
@@ -38,10 +39,11 @@ app.use(errorHandler);
 async function startServer() {
   try {
     await connectMongo();
-    const server = app.listen(config.PORT, () => {
+    const grpcServer = startGrpcServer();
+    const httpServer = app.listen(config.PORT, () => {
       logger.info({ port: config.PORT }, `Product Service listening on HTTP port ${config.PORT}`);
     });
-    return server;
+    return { httpServer, grpcServer };
   } catch (err) {
     logger.error({ err }, "Failed to start Product Service");
     process.exit(1);

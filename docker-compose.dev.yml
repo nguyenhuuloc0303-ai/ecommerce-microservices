@@ -18,6 +18,7 @@ services:
   product-service:
     ports:
       - "3003:3003"
+      - "50053:50053"
 
   auth-service:
     ports:
