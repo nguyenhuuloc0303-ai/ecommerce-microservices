@@ -22,3 +22,7 @@ services:
   auth-service:
     ports:
       - "3001:3001"
+
+  api-gateway:
+    ports:
+      - "8080:8080"

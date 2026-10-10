@@ -103,7 +103,7 @@ services:
       retries: 5
       start_period: 15s
 
-  # 5. Product Service (Catalog & Stock Management)
+  # 5. Product Service
   product-service:
     build:
       context: .
@@ -126,7 +126,7 @@ services:
       timeout: 3s
       retries: 5
 
-  # 6. Auth Service (Identity & Access)
+  # 6. Auth Service
   auth-service:
     build:
       context: .
@@ -152,6 +152,41 @@ services:
       - ecom-net
     healthcheck:
       test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # 7. API Gateway (Only service publishing port 8080 to host)
+  api-gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: api-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: 8080
+      JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-key-for-microservices-2026}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      AUTH_SERVICE_URL: http://auth-service:3001
+      CUSTOMER_SERVICE_URL: http://customer-service:3002
+      PRODUCT_SERVICE_URL: http://product-service:3003
+      ORDER_SERVICE_URL: http://order-service:3004
+      SHIPMENT_SERVICE_URL: http://shipment-service:3005
+      NODE_ENV: development
+    depends_on:
+      redis:
+        condition: service_healthy
+      auth-service:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+    networks:
+      - ecom-net
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:8080/ping').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
       interval: 5s
       timeout: 3s
       retries: 5
