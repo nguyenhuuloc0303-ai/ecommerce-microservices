@@ -1,0 +1,44 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_ORDER")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Order {
+  oid          Int           @id @default(autoincrement())
+  uid          Int
+  discount     Decimal       @db.Decimal(10, 2)
+  total_amount Decimal       @db.Decimal(12, 2)
+  shipid       Int           @unique
+  createdAt    DateTime      @default(now())
+  orderDetails OrderDetail[]
+
+  @@map("Order")
+}
+
+model OrderDetail {
+  oid        Int
+  pid        Int
+  qty        Int
+  unit_price Decimal @db.Decimal(10, 2)
+  order      Order   @relation(fields: [oid], references: [oid], onDelete: Cascade)
+
+  @@id([oid, pid])
+  @@map("OrderDetail")
+}
+
+model OutboxEvent {
+  id        String    @id @default(uuid())
+  topic     String
+  key       String
+  payload   Json
+  status    String    @default("PENDING")
+  attempts  Int       @default(0)
+  createdAt DateTime  @default(now())
+  sentAt    DateTime?
+
+  @@map("OutboxEvent")
+}

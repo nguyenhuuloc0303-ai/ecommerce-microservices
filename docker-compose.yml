@@ -182,7 +182,38 @@ services:
       timeout: 3s
       retries: 5
 
-  # 8. API Gateway
+  # 8. Order Service (Order & OrderDetail + Transactional Outbox)
+  order-service:
+    build:
+      context: .
+      dockerfile: services/order-service/Dockerfile
+    container_name: order-service
+    restart: unless-stopped
+    environment:
+      PORT: 3004
+      DATABASE_URL_ORDER: postgresql://order_user:order_pass@postgres:5432/order_db
+      CUSTOMER_GRPC_URL: customer-service:50052
+      PRODUCT_GRPC_URL: product-service:50053
+      KAFKA_BROKER: kafka:9092
+      NODE_ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      customer-service:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+    networks:
+      - ecom-net
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3004/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # 9. API Gateway
   api-gateway:
     build:
       context: .

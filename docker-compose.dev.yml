@@ -29,6 +29,10 @@ services:
       - "3002:3002"
       - "50052:50052"
 
+  order-service:
+    ports:
+      - "3004:3004"
+
   api-gateway:
     ports:
       - "8080:8080"
