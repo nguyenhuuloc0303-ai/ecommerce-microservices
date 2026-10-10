@@ -1,0 +1,81 @@
+{
+  "title": "UserRegistered",
+  "version": 1,
+  "topic": "identity.user-registered",
+  "schema": {
+    "type": "object",
+    "required": [
+      "eventId",
+      "eventType",
+      "version",
+      "occurredAt",
+      "data"
+    ],
+    "properties": {
+      "eventId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "eventType": {
+        "type": "string",
+        "const": "UserRegistered"
+      },
+      "version": {
+        "type": "integer",
+        "const": 1
+      },
+      "occurredAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "data": {
+        "type": "object",
+        "required": [
+          "uid",
+          "username",
+          "role"
+        ],
+        "properties": {
+          "uid": {
+            "type": "integer"
+          },
+          "username": {
+            "type": "string"
+          },
+          "email": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "phone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "CUSTOMER",
+              "ADMIN",
+              "SHIPMENT_STAFF"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "example": {
+    "eventId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "eventType": "UserRegistered",
+    "version": 1,
+    "occurredAt": "2026-10-10T12:00:00.000Z",
+    "data": {
+      "uid": 1,
+      "username": "customer01",
+      "email": "customer01@example.com",
+      "role": "CUSTOMER"
+    }
+  }
+}

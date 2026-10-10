@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package product;
+
+service ProductService {
+  rpc ReserveStock (ReserveStockRequest) returns (ReserveStockReply);
+  rpc ReleaseStock (ReleaseStockRequest) returns (ReleaseStockReply);
+}
+
+message StockItem {
+  int32 pid = 1;
+  int32 qty = 2;
+}
+
+message ReserveStockRequest {
+  repeated StockItem items = 1;
+}
+
+message ReservedItem {
+  int32 pid = 1;
+  int32 qty = 2;
+  double unit_price = 3;
+}
+
+message ReserveStockReply {
+  repeated ReservedItem items = 1;
+}
+
+message ReleaseStockRequest {
+  repeated StockItem items = 1;
+}
+
+message ReleaseStockReply {
+  bool ok = 1;
+}

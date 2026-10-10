@@ -1,0 +1,108 @@
+{
+  "title": "OrderCreated",
+  "version": 1,
+  "topic": "order.created",
+  "schema": {
+    "type": "object",
+    "required": [
+      "eventId",
+      "eventType",
+      "version",
+      "occurredAt",
+      "data"
+    ],
+    "properties": {
+      "eventId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "eventType": {
+        "type": "string",
+        "const": "OrderCreated"
+      },
+      "version": {
+        "type": "integer",
+        "const": 1
+      },
+      "occurredAt": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "data": {
+        "type": "object",
+        "required": [
+          "oid",
+          "uid",
+          "shipid",
+          "discount",
+          "totalAmount",
+          "items"
+        ],
+        "properties": {
+          "oid": {
+            "type": "integer"
+          },
+          "uid": {
+            "type": "integer"
+          },
+          "shipid": {
+            "type": "integer"
+          },
+          "discount": {
+            "type": "integer"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "pid",
+                "qty",
+                "unit_price"
+              ],
+              "properties": {
+                "pid": {
+                  "type": "integer"
+                },
+                "qty": {
+                  "type": "integer"
+                },
+                "unit_price": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "example": {
+    "eventId": "b2c3d4e5-f6a7-8901-bcde-f12345678901",
+    "eventType": "OrderCreated",
+    "version": 1,
+    "occurredAt": "2026-10-10T12:00:00.000Z",
+    "data": {
+      "oid": 1001,
+      "uid": 1,
+      "shipid": 5001,
+      "discount": 10,
+      "totalAmount": 2722.5,
+      "items": [
+        {
+          "pid": 1,
+          "qty": 2,
+          "unit_price": 1500
+        },
+        {
+          "pid": 2,
+          "qty": 1,
+          "unit_price": 25
+        }
+      ]
+    }
+  }
+}
