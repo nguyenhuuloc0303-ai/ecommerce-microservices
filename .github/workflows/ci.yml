@@ -1,0 +1,34 @@
+name: Microservices CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Create .env from .env.example
+        run: cp .env.example .env
+
+      - name: Start All 10 Microservices Containers
+        run: |
+          docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build --wait
+
+      - name: Run CI Test Suite (Unit + E2E 25 TCs)
+        run: node scripts/ci.js
+
+      - name: Shutdown Containers
+        if: always()
+        run: docker compose down -v
