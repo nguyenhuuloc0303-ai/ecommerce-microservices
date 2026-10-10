@@ -17,7 +17,7 @@ function request(options, body = null) {
 }
 
 async function seed() {
-  console.log(">>> Seeding demo data for practical exam presentation...");
+  console.log(">>> Seeding initial product catalog data...");
 
   // 1. Admin login
   const loginRes = await request({
@@ -27,7 +27,7 @@ async function seed() {
   const adminToken = loginRes.data.accessToken;
   console.log("Admin token acquired");
 
-  // 2. Create standard products X and Y according to PHIEU_CHAM
+  // 2. Seed initial catalog items
   const pX = await request({
     host: "localhost", port: 8080, path: "/api/products", method: "POST",
     headers: { "Authorization": `Bearer ${adminToken}`, "Content-Type": "application/json" }
@@ -40,7 +40,7 @@ async function seed() {
   }, { pname: "Product Y", price: 250.0, quantity: 80 });
   console.log("Product Y created:", pY.data);
 
-  console.log(">>> Demo seed finished successfully!");
+  console.log(">>> Catalog seeding finished successfully!");
 }
 
 seed().catch(console.error);

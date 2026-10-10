@@ -1,54 +1,60 @@
-# E-commerce Microservices MVP · IUH Bài Tập Lớn 3
+# E-Commerce Microservices System
 
-Hệ thống kiến trúc vi dịch vụ thương mại điện tử (E-commerce Microservices) chuẩn Domain-Driven Design (DDD), Database-per-Service, Event-Driven Architecture (Apache Kafka), gRPC high-performance inter-service communication, API Gateway với Redis Rate Limiting & Caching, và Transactional Outbox Pattern.
-
-Hệ sinh thái chuẩn 10 container tối ưu, đáp ứng trọn vẹn 8 tiêu chí chấm thực hành theo `PHIEU_CHAM.pdf`.
+A production-grade microservices architecture for an e-commerce platform built with Domain-Driven Design (DDD), Database-per-Service pattern, Event-Driven messaging via Apache Kafka, high-performance inter-service communication via gRPC, and an API Gateway with Redis caching & rate limiting.
 
 ---
 
-## 🚀 Khởi chạy hệ thống trong 3 bước
+## Architecture Overview
 
+- **Architecture Style**: Microservices, Event-Driven Architecture.
+- **Service Communication**:
+  - External: REST APIs through API Gateway (`:8080`).
+  - Synchronous Internal: gRPC (Protobuf v3) for stock reservations and membership queries.
+  - Asynchronous Internal: Apache Kafka (KRaft mode) for transactional event publishing.
+- **Data Persistence**:
+  - PostgreSQL 16 (Logical isolation: `auth_db`, `customer_db`, `order_db`).
+  - MongoDB 7.0 (Logical isolation: `product_db`, `shipment_db`).
+  - Redis 7 (Fixed-window rate limiting & product catalog caching).
+- **Reliability & Consistency**: Transactional Outbox Pattern with polling publisher and idempotency safeguards.
+
+---
+
+## Services & Ports Directory
+
+| Container | Service Name | HTTP Port | Internal / gRPC | Primary Datastore |
+|---|---|---|---|---|
+| `api-gateway` | API Gateway (Proxy, Cache, Rate Limit, RBAC) | `8080` | — | Redis (Cache & Limiter) |
+| `auth-service` | IAM Service (BCrypt, JWT, Outbox) | `3001` | — | PostgreSQL (`auth_db`) |
+| `customer-service` | Customer & Membership Service | `3002` | `50052` (gRPC) | PostgreSQL (`customer_db`) |
+| `product-service` | Product Catalog & Inventory Service | `3003` | `50053` (gRPC) | MongoDB (`product_db`) |
+| `order-service` | Order Management & Discount Engine | `3004` | — | PostgreSQL (`order_db`) |
+| `shipment-service` | Shipment & Tracking State Machine | `3005` | — | MongoDB (`shipment_db`) |
+| `postgres` | PostgreSQL 16 Relational Engine | — | `5432` | PostgreSQL Engine |
+| `mongo` | MongoDB 7 NoSQL Engine | — | `27017` | MongoDB Engine |
+| `redis` | Redis In-Memory Store | — | `6379` | In-memory Cache |
+| `kafka` | Apache Kafka 3.9 Event Broker | — | `9092` | Event Log |
+
+---
+
+## Quickstart
+
+### 1. Start All Containers
 ```bash
-# Bước 1: Clone repo hoặc cd vào thư mục dự án
-cd ecommerce-microservices
-
-
-# Bước 3: Khởi động toàn bộ 10 container
 docker compose up -d --build
 ```
 
-Kiểm tra trạng thái hệ thống:
+### 2. Verify System Health
 ```bash
 curl http://localhost:8080/api/health
 docker ps
 ```
 
-Chạy toàn bộ 25 bài test tự động (Unit + E2E):
+### 3. Seed Initial Catalog Data
 ```bash
-npm run ci
-# hoặc: node scripts/ci.js
+node scripts/seed.js
 ```
 
----
-
-## 🏛️ Danh mục 10 Container & Cổng dịch vụ
-
-| STT | Container | Dịch vụ | Cổng HTTP | Cổng gRPC / DB | Database |
-|---|---|---|---|---|---|
-| 1 | `api-gateway` | API Gateway (Reverse Proxy + Redis Cache + RBAC + Rate Limit) | 8080 | — | Redis (Cache) |
-| 2 | `auth-service` | Identity & Access Management (BCrypt + JWT + Outbox) | 3001 | — | PostgreSQL (`auth_db`) |
-| 3 | `customer-service` | Customer & Membership Tier Service | 3002 | 50052 | PostgreSQL (`customer_db`) |
-| 4 | `product-service` | Product Catalog & Inventory Service | 3003 | 50053 | MongoDB (`product_db`) |
-| 5 | `order-service` | Order Management & Discount Policy (Outbox) | 3004 | — | PostgreSQL (`order_db`) |
-| 6 | `shipment-service` | Shipment & Tracking State Machine (Consumer) | 3005 | — | MongoDB (`shipment_db`) |
-| 7 | `postgres` | PostgreSQL 16 (3 logical DBs cách ly hoàn toàn) | — | 5432 | Postgres Engine |
-| 8 | `mongo` | MongoDB 7 (2 logical DBs cách ly hoàn toàn) | — | 27017 | Mongo Engine |
-| 9 | `redis` | Redis 7 Alpine (Fixed-window Rate Limit & Product Cache) | — | 6379 | In-memory K/V |
-| 10 | `kafka` | Apache Kafka 3.9 KRaft (Event Broker: `user-registered`, `order-created`) | — | 9092 | Event Log |
-
----
-
-## 📚 Tài liệu chi tiết
-- **Kiến trúc hệ thống & Trả lời vấn đáp:** [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
-- **Kịch bản Demo thi vấn đáp theo Phiếu chấm:** [`docs/DEMO.md`](./docs/DEMO.md)
-- **Postman Collection demo tự động:** [`docs/postman_collection.json`](./docs/postman_collection.json)
+### 4. Run Automated CI / Test Suite
+```bash
+node scripts/ci.js
+```
